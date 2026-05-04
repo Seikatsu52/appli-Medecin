@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="fr">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>RDV Medicaux</title>
+        <link rel="stylesheet" href="/application/style.css" />
+        <link
+            rel="stylesheet"
+            href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+            integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+            crossorigin=""
+        />
+    </head>
+    <body>
+        <main class="page-shell">
+            <section class="hero-card">
+                <p class="eyebrow">Plateforme patient locale</p>
+                <div class="hero-layout">
+                    <div>
+                        <h1>RDV medicaux a Issy-les-Moulineaux</h1>
+                        <p class="lead" id="heroLead">
+                            Recherchez un praticien de proximite, connectez-vous puis reservez un creneau de 20 minutes.
+                        </p>
+                    </div>
+                    <div class="hero-panel">
+                        <p class="hero-panel-label">Statut du compte</p>
+                        <p class="hero-panel-value" id="authStateLabel">Visiteur</p>
+                        <p class="hero-panel-copy" id="authStateCopy">
+                            Connectez-vous ou creez votre espace patient pour acceder a la prise de rendez-vous.
+                        </p>
+                    </div>
+                </div>
+                <div class="hero-metrics">
+                    <article class="metric-card">
+                        <span class="metric-label">Praticiens disponibles</span>
+                        <strong class="metric-value" id="doctorCountValue">--</strong>
+                    </article>
+                    <article class="metric-card">
+                        <span class="metric-label">Rendez-vous a venir</span>
+                        <strong class="metric-value" id="appointmentCountValue">0</strong>
+                    </article>
+                    <article class="metric-card">
+                        <span class="metric-label">Prochain rendez-vous</span>
+                        <strong class="metric-value metric-value-small" id="nextAppointmentValue">Aucun programme</strong>
+                    </article>
+                </div>
+                <div class="hero-actions">
+                    <button type="button" id="heroLoginButton" onclick="scrollToSection('loginCard')">Se connecter</button>
+                    <button type="button" class="secondary-button" id="heroRegisterButton" onclick="scrollToSection('registerCard')">
+                        S'inscrire
+                    </button>
+                    <button type="button" id="heroBookingButton" class="hidden" onclick="scrollToSection('bookingCard')">
+                        Prendre un rendez-vous
+                    </button>
+                    <button type="button" class="secondary-button hidden" id="heroLogoutButton" onclick="logout()">
+                        Se deconnecter
+                    </button>
+                </div>
+                <div id="statusMessage" class="status-message hidden"></div>
+            </section>
+
+            <section class="card" id="mapCard">
+                <h2>Carte des praticiens</h2>
+                <p class="section-copy">
+                    Les cabinets sont charges depuis le jeu de donnees OpenData de la ville avec acces direct a la reservation.
+                </p>
+                <div id="map"></div>
+            </section>
+
+            <section class="grid-two hidden" id="authSection">
+                <section class="card hidden" id="loginCard">
+                    <h2>Connexion</h2>
+                    <p class="section-copy">Retrouvez votre profil, vos rendez-vous et vos disponibilites en temps reel.</p>
+                    <div class="field-stack">
+                        <input type="text" id="loginPatient" placeholder="Login" />
+                        <input type="password" id="mdpPatientLogin" placeholder="Mot de passe" />
+                        <button type="button" onclick="login()">Se connecter</button>
+                    </div>
+                </section>
+
+                <section class="card hidden" id="registerCard">
+                    <h2>Inscription</h2>
+                    <p class="section-copy">Creation du dossier patient pour reserver, modifier ou annuler vos rendez-vous.</p>
+                    <div class="field-stack" id="registerFormFields">
+                        <input type="text" id="nomPatient" placeholder="Nom" />
+                        <input type="text" id="prenomPatient" placeholder="Prenom" />
+                        <input type="text" id="ruePatient" placeholder="Rue" />
+                        <input type="text" id="cpPatient" placeholder="Code postal" />
+                        <input type="text" id="villePatient" placeholder="Ville" value="Issy-les-Moulineaux" />
+                        <input type="text" id="telPatient" placeholder="Telephone" />
+                        <input type="text" id="loginPatientRegister" placeholder="Login" />
+                        <input type="password" id="mdpPatientRegister" placeholder="Mot de passe fort (13+ caracteres)" />
+                        <button type="button" onclick="register()">S'inscrire</button>
+                    </div>
+                </section>
+            </section>
+
+            <section class="card info-strip" id="guestInfoCard">
+                <div>
+                    <h2>Comment ca fonctionne</h2>
+                    <p class="section-copy">Consultez la carte, creez votre espace patient puis choisissez un praticien et un creneau libre.</p>
+                </div>
+                <div class="info-strip-items">
+                    <div class="info-pill">Reservation en ligne</div>
+                    <div class="info-pill">Modification rapide</div>
+                    <div class="info-pill">Annulation autonome</div>
+                </div>
+            </section>
+
+            <section class="card hidden" id="bookingCard">
+                <h2 id="bookingTitle">Reserver un rendez-vous</h2>
+                <div class="field-stack">
+                    <select id="doctorSelect"></select>
+                    <input type="date" id="rdvDate" />
+                    <p class="section-copy">Les rendez-vous sont proposes de 08:00 a 12:00 puis de 14:00 a 19:00.</p>
+                    <div id="rdvTime" class="time-grid"></div>
+                    <div class="button-row">
+                        <button type="button" onclick="submitRdv()">Enregistrer</button>
+                        <button type="button" class="secondary-button hidden" id="cancelEditButton" onclick="resetBookingForm()">
+                            Annuler la modification
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <section class="card hidden" id="rdvCard">
+                <h2>Mes rendez-vous a venir</h2>
+                <ul id="rdvList" class="appointment-list"></ul>
+            </section>
+        </main>
+
+        <script
+            src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+            crossorigin=""
+        ></script>
+        <script src="/application/app.js"></script>
+    </body>
+</html>
