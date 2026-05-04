@@ -97,6 +97,8 @@ class AuthController extends Controller
 
     private function issueToken(Patient $patient, string $ipAddress): string
     {
+        $ipAddress = $this->normalizeIpAddress($ipAddress);
+
         Authentification::query()
             ->where('idPatient', $patient->idPatient)
             ->where('ipAppareil', $ipAddress)
@@ -125,5 +127,10 @@ class AuthController extends Controller
             'telPatient' => $patient->telPatient,
             'loginPatient' => $patient->loginPatient,
         ];
+    }
+
+    private function normalizeIpAddress(string $ipAddress): string
+    {
+        return $ipAddress === '::1' ? '127.0.0.1' : $ipAddress;
     }
 }

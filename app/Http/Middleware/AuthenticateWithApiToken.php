@@ -27,7 +27,7 @@ class AuthenticateWithApiToken
 
         $authentification = Authentification::query()
             ->where('token', $plainToken)
-            ->where('ipAppareil', $request->ip())
+            ->whereIn('ipAppareil', $this->candidateIpAddresses($request->ip()))
             ->with('patient')
             ->first();
 
@@ -40,5 +40,16 @@ class AuthenticateWithApiToken
         $request->setUserResolver(fn () => $authentification->patient);
 
         return $next($request);
+    }
+
+    private function candidateIpAddresses(?string $ipAddress): array
+    {
+        $addresses = array_filter([$ipAddress]);
+
+        if (in_array($ipAddress, ['127.0.0.1', '::1'], true)) {
+            $addresses = array_merge($addresses, ['127.0.0.1', '::1']);
+        }
+
+        return array_values(array_unique($addresses));
     }
 }
